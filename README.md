@@ -21,7 +21,7 @@ To use the project you are required to:
 - Set the Scripting Runtime Version .NET 4.x Equivalent
 - Add Editor Corutines from the package manager
 - Switch To PSVita in the build settings and make sure its set to PC Hosted oT- 
-- To use build and run you must go into power save settings on the vita and set standby mode to 10-30 mins and tick use wifi in power mode
+- To improve chances of FTP transfering going through in vita settings and power settings set standby mode to 10-30 mins and turn on use Wifi in power save mode
  
 Note: These tools were made for use with Unity 2018.2.19f1
     
