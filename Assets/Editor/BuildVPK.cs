@@ -21,16 +21,16 @@ namespace PSVitaUtilities.Building
             string Error="Project Failed To Build";
             try
             {
-                Error = "Build FTP VPK Failed (Failed to Load Settings)";
+                Error = "Build VPK Failed (Failed to Load Settings)";
                 PSVitaUtilitiesSettings.LoadSettings();
-
-                if(!PSVitaUtilitiesSettings.CheckValidTitleID())
+                Error = "Build VPK Failed (TitleID Check Error, Try turning off the TitleID Check in settings or Refreshing the VitaDB in settings)";
+                if (!PSVitaUtilitiesSettings.CheckValidTitleID())
                 {
                     Debug.LogError("TitleID Error can be changed in project settings or in the psvita settings");
                     return;
                 }
-
                 EditorUtility.DisplayProgressBar("Building", "Starting process...", 1f / 5f);
+                Error = "Build VPK Failed (Failed to set path)";
                 string BuildPath = Application.dataPath.TrimEnd("Assets".ToCharArray()) + "/Build/TempBuild";
                 string filePath = EditorUtility.SaveFilePanel("Save VPK file", "", "", "vpk");
                 if(filePath=="")
@@ -78,6 +78,8 @@ namespace PSVitaUtilities.Building
             {
                 Error = "Build FTP VPK Failed (Failed to Load Settings)";
                 PSVitaUtilitiesSettings.LoadSettings();
+
+                Error = "Build FTP VPK Failed (TitleID Check Error, Try turning off the TitleID Check in settings or Refreshing the VitaDB in settings)";
                 if (!PSVitaUtilitiesSettings.CheckValidTitleID())
                 {
                     Debug.LogError("TitleID Error can be changed in project settings or in the psvita settings");
@@ -137,6 +139,7 @@ namespace PSVitaUtilities.Building
                 {
                     return;
                 }
+                Error = "Build and Run Failed (TitleID Check Error, Try turning off the TitleID Check in settings or Refreshing the VitaDB in settings)";
                 if (!PSVitaUtilitiesSettings.CheckValidTitleID())
                 {
                     Debug.LogError("TitleID Error can be changed in project settings or in the psvita settings");

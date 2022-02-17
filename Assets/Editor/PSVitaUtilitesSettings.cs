@@ -79,7 +79,7 @@ namespace PSVitaUtilities.Settings
             window.minSize = new Vector2(450, 300);
             window.Show();
         }
-
+        
         void OnGUI()
         {
             if (!Loaded)
@@ -90,10 +90,10 @@ namespace PSVitaUtilities.Settings
             }
 
             GUILayout.Label("Utilty Settings", EditorStyles.boldLabel);
-            GUILayout.Label("Please keep in mind that this package makes use of the PSVita Companion Plugin and is Required for Vita Control Functionality.", EditorStyles.wordWrappedLabel);
-            if (GUILayout.Button("Link to PSVita Companion Plugin on GitHub"))
+            GUILayout.Label("Please keep in mind that this package makes use of the PSVita Companion Plugin and is Required for Vita Control Functionality. It can be downloaded through AutoPlugin 2 on the vita.", EditorStyles.wordWrappedLabel);
+            if (GUILayout.Button("Link to PSVita Utilites on GitHub"))
             {
-                Application.OpenURL("https://github.com/devnoname120/vitacompanion/");
+                Application.OpenURL("https://github.com/GlitcherOG/PSVita-Unity-Utilities");
             }
 
             GUILayout.Space(16);
@@ -102,6 +102,10 @@ namespace PSVitaUtilities.Settings
             FTPLocation = EditorGUILayout.TextField("FTP Build Location", FTPLocation);
             FastBuild = EditorGUILayout.ToggleLeft("Fast Development Building (trial version will show in the bottom corner)", FastBuild, EditorStyles.wordWrappedLabel);
             VitaBDCheck = EditorGUILayout.ToggleLeft("Check TitleID against the VitaDB", VitaBDCheck, EditorStyles.wordWrappedLabel);
+            if (GUILayout.Button("Refresh VitaDB"))
+            {
+                LoadVitaDB();
+            }
 
             GUILayout.Space(16);
 
@@ -168,7 +172,6 @@ namespace PSVitaUtilities.Settings
             }
             return true;
         }
-
         #region Loading TitleIDs from VitaDB
         public void LoadVitaDB()
         {
@@ -190,6 +193,8 @@ namespace PSVitaUtilities.Settings
         #endregion
     }
 
+
+
     [System.Serializable]
     public class VitaDBItem
     {
@@ -208,12 +213,13 @@ namespace PSVitaUtilities.Settings
             Wrapper<T> wrapper = JsonUtility.FromJson<Wrapper<T>>(FixJson(json));
             return wrapper.Items;
         }
-
+#pragma warning disable 0649
         [System.Serializable]
         private class Wrapper<T>
         {
-            public T[] Items = null;
+            public T[] Items;
         }
+#pragma warning restore 0649
         /// <summary>
         /// Formats JSON in a way that makes the FromJson thing above work
         /// </summary>
