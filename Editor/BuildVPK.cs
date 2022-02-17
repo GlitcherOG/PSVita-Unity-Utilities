@@ -18,7 +18,7 @@ namespace PSVitaUtilities.Building
         [MenuItem("PSVita/Build/Build VPK")]
         public static void BuildGame()
         {
-            string Error="Project Failed To Build";
+            string Error = "Project Failed To Build";
             try
             {
                 Error = "Build VPK Failed (Failed to Load Settings)";
@@ -33,7 +33,7 @@ namespace PSVitaUtilities.Building
                 Error = "Build VPK Failed (Failed to set path)";
                 string BuildPath = Application.dataPath.TrimEnd("Assets".ToCharArray()) + "/Build/TempBuild";
                 string filePath = EditorUtility.SaveFilePanel("Save VPK file", "", "", "vpk");
-                if(filePath=="")
+                if (filePath == "")
                 {
                     EditorUtility.ClearProgressBar();
                     return;
@@ -116,7 +116,7 @@ namespace PSVitaUtilities.Building
                 Error = "Build FTP VPK Failed (Network Error, Failed to Transfer Build)";
                 EditorUtility.DisplayProgressBar("Building", "Transfering build...", 6f / 6f);
                 string productName = PlayerSettings.productName;
-                t = Task.Run(() => TransferFTPVPK(filePath, "ftp://"+PSVitaUtilitiesSettings.PSVitaIP+":1337/"+ PSVitaUtilitiesSettings.FTPLocation + "/" + productName + ".vpk"));
+                t = Task.Run(() => TransferFTPVPK(filePath, "ftp://" + PSVitaUtilitiesSettings.PSVitaIP + ":1337/" + PSVitaUtilitiesSettings.FTPLocation + "/" + productName + ".vpk"));
                 t.Wait();
             }
             catch
@@ -172,12 +172,13 @@ namespace PSVitaUtilities.Building
 
                 Error = "Build and Run Failed (Network Error, Failed to Tranfer Build)";
                 EditorUtility.DisplayProgressBar("Building", "Transfering build...", 5f / 6f);
-                t = Task.Run(() => TransferFolder(BuildPath, "ftp://" + PSVitaUtilitiesSettings.PSVitaIP + ":1337/ux0:/app/" + PSVitaUtilitiesSettings.TitleID));
+                string temp = PSVitaUtilitiesSettings.TitleID;
+                t = Task.Run(() => TransferFolder(BuildPath, "ftp://" + PSVitaUtilitiesSettings.PSVitaIP + ":1337/ux0:/app/" + temp));
                 t.Wait();
                 EditorUtility.DisplayProgressBar("Building", "Booting Game...", 6f / 6f);
                 Error = "Build and Run Failed (Network Error, Failed to Reboot Vita)";
                 VitaReboot();
-                if (EditorUtility.DisplayDialog("Start Game?","Is the vita ready to start the game?", "Yes", "No"))
+                if (EditorUtility.DisplayDialog("Start Game?", "Is the vita ready to start the game?", "Yes", "No"))
                 {
                     Error = "Build and Run Failed (Network Error, Failed To Launch Game was the vita fully rebooted?)";
                     Screenon();
@@ -282,7 +283,7 @@ namespace PSVitaUtilities.Building
             using (BufferedStream bufStream = new BufferedStream(stream, byteSequence.Length))
             {
                 int i = 0;
-                if(i!=0)
+                if (i != 0)
                 {
                     i = 0;
                 }
