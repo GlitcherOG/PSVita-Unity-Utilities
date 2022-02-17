@@ -24,7 +24,7 @@ To use the project you are required to:
 Note: These tools were made for use with Unity 2018.2.19f1
     
 ## Installation
-Just import the Unity Package into the Project or download the git and add the editor folder and mcs.rsp to the asset folder folder of your project
+Just import the Unity Package into the Project or download the git and add the editor folder and mcs.rsp to the asset folder of your project
 ## Authors
 - [GlitcherOG](https://github.com/GlitcherOG)
 - [Jody3D](https://github.com/Jordy3D)
