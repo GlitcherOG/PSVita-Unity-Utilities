@@ -17,41 +17,20 @@ namespace PSVitaUtilities.Settings
         public static string FTPLocation;
         public static bool FastBuild;
         public static bool VitaBDCheck;
-        public static string developerName
+        public static string DeveloperName
         {
-            get
-            {
-                return PlayerSettings.companyName;
-            }
-
-            set
-            {
-                PlayerSettings.companyName = value;
-            }
+            get { return PlayerSettings.companyName; }
+            set { PlayerSettings.companyName = value; }
         }
-        public static string productName
+        public static string ProductName
         {
-            get
-            {
-                return PlayerSettings.productName;
-            }
-
-            set
-            {
-                PlayerSettings.productName = value;
-            }
+            get { return PlayerSettings.productName; }
+            set { PlayerSettings.productName = value; }
         }
-        public static string shortTitle
+        public static string ShortTitle
         {
-            get
-            {
-                return PlayerSettings.PSVita.shortTitle;
-            }
-
-            set
-            {
-                PlayerSettings.PSVita.shortTitle = value;
-            }
+            get { return PlayerSettings.PSVita.shortTitle; }
+            set { PlayerSettings.PSVita.shortTitle = value; }
         }
         public static string TitleID
         {
@@ -110,9 +89,9 @@ namespace PSVitaUtilities.Settings
             GUILayout.Space(16);
 
             GUILayout.Label("Project Settings", EditorStyles.boldLabel);
-            developerName = EditorGUILayout.TextField("Developed by", developerName);
-            productName = EditorGUILayout.TextField("Title", productName);
-            shortTitle = EditorGUILayout.TextField("Short Title", shortTitle);
+            DeveloperName = EditorGUILayout.TextField("Developed by", DeveloperName);
+            ProductName = EditorGUILayout.TextField("Title", ProductName);
+            ShortTitle = EditorGUILayout.TextField("Short Title", ShortTitle);
             TitleID = EditorGUILayout.TextField("TitleID", TitleID);
             if (GUILayout.Button("Save"))
             {
