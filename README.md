@@ -20,7 +20,7 @@ Tools to help speed up PSVita Unity Development
 To use the project you are required to:
 - Set the Scripting Runtime Version .NET 4.x Equivalent
 - Add Editor Corutines from the package manager
-- Switch To PSVita in the build menu and make sure its set to PC Hosted
+- Switch To PSVita in the build settings and make sure its set to PC Hosted
 
 Note: These tools were made for use with Unity 2018.2.19f1
     
