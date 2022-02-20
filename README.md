@@ -12,7 +12,7 @@ Tools to help speed up PSVita Unity Development
 - Build and Running (WIP)
 - Vita Control
 - Easy Access to Important Project Settings like TitleID
-- Checking TitleID Against the VitaDB (Unity 2018)
+- Checking TitleID Against the VitaDB 
 
 
 ## Requirements
