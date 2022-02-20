@@ -356,7 +356,7 @@ namespace PSVitaUtilities.Building
                 {
                     try
                     {
-                        if (retry == 3)
+                        if (retry >= PSVitaUtilitiesSettings.Retying)
                         {
                             break;
                         }
@@ -391,7 +391,7 @@ namespace PSVitaUtilities.Building
                         catch
                         {
                             retry += 1;
-                            if (retry >= 3)
+                            if (retry >= PSVitaUtilitiesSettings.Retying)
                             {
                                 Debug.LogError("Build and Run Failed (Network Error: Failed to Transfer Build)");
                                 error.RemoveRange(0, error.Count);
@@ -400,7 +400,7 @@ namespace PSVitaUtilities.Building
                     }
                 }
             }
-            else if (retry >= 3)
+            else if (retry >= PSVitaUtilitiesSettings.Retying)
             {
                 Debug.LogError("Build and Run Failed (Network Error: Failed to Transfer Build)");
             }

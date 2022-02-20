@@ -19,6 +19,7 @@ namespace PSVitaUtilities.Settings
         public static string FTPLocation;
         public static bool FastBuild;
         public static bool VitaBDCheck;
+        public static int Retying;
         public static string DeveloperName
         {
             get { return PlayerSettings.companyName; }
@@ -85,6 +86,7 @@ namespace PSVitaUtilities.Settings
 
             PSVitaIP = EditorGUILayout.TextField("PSVita IP", PSVitaIP);
             FTPLocation = EditorGUILayout.TextField("FTP Build Location", FTPLocation);
+            Retying = EditorGUILayout.IntField("FTP Retries", Retying);
             FastBuild = EditorGUILayout.ToggleLeft("Fast Development Building (trial version will show in the bottom corner)", FastBuild, EditorStyles.wordWrappedLabel);
             VitaBDCheck = EditorGUILayout.ToggleLeft("Check TitleID against the VitaDB", VitaBDCheck, EditorStyles.wordWrappedLabel);
             if (GUILayout.Button("Refresh VitaDB"))
@@ -113,6 +115,7 @@ namespace PSVitaUtilities.Settings
             FastBuild = EditorPrefs.GetBool("FastBuild", false);
             FTPLocation = EditorPrefs.GetString("FTPLocation", "ux0:/");
             VitaBDCheck = EditorPrefs.GetBool("VitaDBCheck", true);
+            Retying = EditorPrefs.GetInt("Retying", 3);
         }
         public static void SaveSettings()
         {
@@ -124,6 +127,7 @@ namespace PSVitaUtilities.Settings
             }
             EditorPrefs.SetString("FTPLocation", FTPLocation);
             EditorPrefs.SetBool("VitaDBCheck", VitaBDCheck);
+            EditorPrefs.SetInt("Retying", Retying);
             if (TitleID.Length != 9)
             {
                 Debug.LogError("Title ID is recomended to be 9 characters long with 4 letters and 5 numbers (E.g. ABCD12345)");
