@@ -1,6 +1,6 @@
 ﻿using UnityEditor;
 using UnityEngine;
-using Unity.EditorCoroutines.Editor;
+//using Unity.EditorCoroutines.Editor;
 using System.Threading;
 using System.IO;
 using System.IO.Compression;
