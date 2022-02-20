@@ -340,7 +340,25 @@ namespace PSVitaUtilities.Building
         private static async Task TransferFTPVPK(string _filePath, string _ip)
         {
             WebClient client = new WebClient();
-            client.UploadFile(new Uri(_ip), _filePath);
+            int error = 0;
+            bool done = false;
+            while (!done)
+            {
+                try
+                {
+                    client.UploadFile(new Uri(_ip), _filePath);
+                    done = true;
+                }
+                catch
+                {
+                    error += 1;
+                    if(error>=PSVitaUtilitiesSettings.Retying)
+                    {
+                        done = true;
+                        Debug.LogError("Build FTP VPK Failed (Network Error: Failed to transfer Build)");
+                    }
+                }
+            }
             await Task.Delay(1000);
         }
         private async static Task TransferFolder(string _filePath, string _ip)
