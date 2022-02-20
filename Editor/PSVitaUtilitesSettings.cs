@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using UnityEngine.Networking;
-using Unity.EditorCoroutines.Editor;
 using System.IO;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace PSVitaUtilities.Settings
 {
@@ -169,26 +169,10 @@ namespace PSVitaUtilities.Settings
         public void DownloadVitaDBCache()
         {
             Debug.Log("Downloading VitaDB Cache...");
-            //WebClient client = new WebClient();
-            //client.DownloadFile("https://rinnegatamante.it/vitadb/list_hbs_json.php", Application.dataPath + "/Editor/vitadb.txt");
-            EditorCoroutineUtility.StartCoroutine(GetJSON("https://rinnegatamante.it/vitadb/list_hbs_json.php"), this);
-        }
-
-        static protected IEnumerator GetJSON(string url)
-        {
-            using (UnityWebRequest www = UnityWebRequest.Get(url))
-            {
-                yield return www.SendWebRequest();
-
-                if (www.isNetworkError || www.isHttpError)
-                    Debug.LogError(www.error);
-                else
-                {
-                    vitaDBJSON = www.downloadHandler.text;
-                    File.WriteAllText(Application.dataPath + "/Editor/vitadb.txt", vitaDBJSON);
-                    Debug.Log("VitaDB cache downloaded");
-                }
-            }
+            WebClient client = new WebClient();
+            client.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
+            client.DownloadFile("https://rinnegatamante.it/vitadb/list_hbs_json.php", Application.dataPath + "/Editor/vitadb.txt");
+            Debug.Log("Downloaded");
         }
         #endregion
     }

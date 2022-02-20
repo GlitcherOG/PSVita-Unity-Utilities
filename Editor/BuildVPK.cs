@@ -65,16 +65,16 @@ namespace PSVitaUtilities.Building
                     if (!EditorUtility.DisplayDialog("Are you sure?", "This is a work in progress function meant only to quickly test out code changes, it requires the game being preinstalled on the system", "Continue", "Stop"))
                         return;
 
-                    EditorUtility.DisplayProgressBar("Building", "Killing All Apps On Vita...", 0f / 6f);
-                    Error = $"{buildType} Failed (Network Error: Failed to kill all apps)";
-                    VitaDestroy();
-                }
-                #endregion
+          EditorUtility.DisplayProgressBar("Building", "Killing All Apps On Vita...", 0f / 6f);
+          Error = $"{buildType} Failed (Network Error: Failed to kill all apps)";
+          VitaDestroy();
 
-                #region Initialise Vita
-                Error = $"{buildType} Failed (Network Error: Failed to initially reboot Vita)";
-                VitaReboot();
-                #endregion
+          #region Initialise Vita
+          Error = $"{buildType} Failed (Network Error: Failed to initially reboot Vita)";
+          VitaReboot();
+          #endregion
+        }
+        #endregion
 
                 #region TitleID Check
                 Error = $"{buildType} Failed (TitleID Check Error: Try turning off the TitleID Check in settings or Refreshing the VitaDB in settings)";
@@ -346,12 +346,57 @@ namespace PSVitaUtilities.Building
         private async static Task TransferFolder(string _filePath, string _ip)
         {
             WebClient client = new WebClient();
+            //client.Timeout = 30000;
             var temp = Directory.GetFiles(_filePath, "*.*", SearchOption.AllDirectories);
+            List<int> error = new List<int>();
+            int retry = 0;
             for (int i = 0; i < temp.Length; i++)
             {
                 if (!temp[i].Contains("sce_sys"))
                 {
-                    client.UploadFile(new Uri(_ip + temp[i].Substring(_filePath.Length)), temp[i]);
+                    try
+                    {
+                        if (retry == 3)
+                        {
+                            break;
+                        }
+                        client.UploadFile(new Uri(_ip + temp[i].Substring(_filePath.Length)), temp[i]);
+                        retry = 0;
+                    }
+                    catch
+                    {
+                        retry += 1;
+                        Debug.LogError("Network Error on " + temp[i].Substring(_filePath.Length));
+                        error.Add(i);
+                    }
+                }
+            }
+            if (error.Count != 0)
+            {
+                while (error.Count != 0)
+                {
+                    for (int i = 0; i < error.Count; i++)
+                    {
+                        Debug.Log("Retrying Upload");
+                        try
+                        {
+                            if (error.Count != 0)
+                            {
+                                client.UploadFile(new Uri(_ip + temp[error[i]].Substring(_filePath.Length)), temp[error[i]]);
+                                error.RemoveAt(i);
+                                i--;
+                                retry = 0;
+                            }
+                        }
+                        catch
+                        {
+                            retry += 1;
+                            if (retry == 3)
+                            {
+                                error.RemoveRange(0, error.Count);
+                            }
+                        }
+                    }
                 }
             }
             await Task.Delay(3000);
