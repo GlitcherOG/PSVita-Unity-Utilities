@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using UnityEngine.Networking;
-using Unity.EditorCoroutines.Editor;
+//using Unity.EditorCoroutines.Editor;
 using System.IO;
 
 namespace PSVitaUtilities.Settings
@@ -60,12 +60,6 @@ namespace PSVitaUtilities.Settings
       window.Show();
     }
 
-    public void Awake()
-    {
-      if (!File.Exists(Application.dataPath + "/vitadb.txt"))
-        DownloadVitaDBCache();
-    }
-
     void OnGUI()
     {
       #region Initialisation
@@ -89,11 +83,11 @@ namespace PSVitaUtilities.Settings
       PSVitaIP = EditorGUILayout.TextField("PSVita IP", PSVitaIP);
       FTPLocation = EditorGUILayout.TextField("FTP Build Location", FTPLocation);
       FastBuild = EditorGUILayout.ToggleLeft("Fast Development Building (trial version will show in the bottom corner)", FastBuild, EditorStyles.wordWrappedLabel);
-      VitaBDCheck = EditorGUILayout.ToggleLeft("Check TitleID against the VitaDB", VitaBDCheck, EditorStyles.wordWrappedLabel);
-      if (GUILayout.Button("Refresh VitaDB"))
-      {
-        DownloadVitaDBCache();
-      }
+      //VitaBDCheck = EditorGUILayout.ToggleLeft("Check TitleID against the VitaDB", VitaBDCheck, EditorStyles.wordWrappedLabel);
+      //if (GUILayout.Button("Refresh VitaDB"))
+      //{
+      //  //DownloadVitaDBCache();
+      //}
 
       GUILayout.Space(16);
 
@@ -146,82 +140,82 @@ namespace PSVitaUtilities.Settings
         if (!EditorUtility.DisplayDialog("TitleID", "This project is using the default Title ID and may override any other application using that Title ID.\nDo you want to continue?", "Yes", "No"))
           return false;
       }
-      if (!skipVitaDBCheck || VitaBDCheck)
-      {
-        bool idFound = false; // Needed in case multiple of the same ID exists on VitaDB. This is actually the case for "ABCD12345", but we have our own check for that above.
+      //if (!skipVitaDBCheck || VitaBDCheck)
+      //{
+      //  bool idFound = false; // Needed in case multiple of the same ID exists on VitaDB. This is actually the case for "ABCD12345", but we have our own check for that above.
 
-        string json = File.ReadAllText(Application.dataPath + "/vitadb.txt");
+      //  string json = File.ReadAllText(Application.dataPath + "/vitadb.txt");
 
-        VitaDBItem[] vitaDBItems = VitaDBItem.LoadVitaDBTitleIDs(json);
+      //  VitaDBItem[] vitaDBItems = VitaDBItem.LoadVitaDBTitleIDs(json);
 
-        foreach (VitaDBItem item in vitaDBItems)
-        {
-          if (item.titleid == TitleID && idFound == false)
-          {
-            idFound = true;
-            if (!EditorUtility.DisplayDialog("Title ID", "The Title ID you have entered appears to already exist on VitaDB. Using this ID may cause issues in the future in case you install those applications.\nDo you want to continue with this Title ID?", "Yes", "No"))
-              return false;
-          }
-        }
-      }
+      //  foreach (VitaDBItem item in vitaDBItems)
+      //  {
+      //    if (item.titleid == TitleID && idFound == false)
+      //    {
+      //      idFound = true;
+      //      if (!EditorUtility.DisplayDialog("Title ID", "The Title ID you have entered appears to already exist on VitaDB. Using this ID may cause issues in the future in case you install those applications.\nDo you want to continue with this Title ID?", "Yes", "No"))
+      //        return false;
+      //    }
+      //  }
+      //}
       return true;
     }
 
     #region Loading TitleIDs from VitaDB
-    public void DownloadVitaDBCache()
-    {
-      Debug.Log("Downloading VitaDB Cache...");
-      EditorCoroutineUtility.StartCoroutine(GetJSON("https://rinnegatamante.it/vitadb/list_hbs_json.php"), this);
-    }
+    //public void DownloadVitaDBCache()
+    //{
+    //  Debug.Log("Downloading VitaDB Cache...");
+    //  //EditorCoroutineUtility.StartCoroutine(GetJSON("https://rinnegatamante.it/vitadb/list_hbs_json.php"), this);
+    //}
 
-    static protected IEnumerator GetJSON(string url)
-    {
-      using (UnityWebRequest www = UnityWebRequest.Get(url))
-      {
-        yield return www.SendWebRequest();
+    //static protected IEnumerator GetJSON(string url)
+    //{
+    //  using (UnityWebRequest www = UnityWebRequest.Get(url))
+    //  {
+    //    yield return www.SendWebRequest();
 
-        if (www.isNetworkError || www.isHttpError)
-          Debug.LogError(www.error);
-        else
-        {
-          vitaDBJSON = www.downloadHandler.text;
-          File.WriteAllText(Application.dataPath + "/vitadb.txt", vitaDBJSON);
-          Debug.Log("VitaDB cache downloaded");
-        }
-      }
-    }
+    //    if (www.isNetworkError || www.isHttpError)
+    //      Debug.LogError(www.error);
+    //    else
+    //    {
+    //      vitaDBJSON = www.downloadHandler.text;
+    //      File.WriteAllText(Application.dataPath + "/vitadb.txt", vitaDBJSON);
+    //      Debug.Log("VitaDB cache downloaded");
+    //    }
+    //  }
+    //}
     #endregion
   }
-  [System.Serializable]
-  public class VitaDBItem
-  {
-    public string titleid;
+//  [System.Serializable]
+//  public class VitaDBItem
+//  {
+//    public string titleid;
 
-    public static VitaDBItem[] LoadVitaDBTitleIDs(string jsonString) => JsonHelper.FromJson<VitaDBItem>(jsonString);
-  }
+//    //public static VitaDBItem[] LoadVitaDBTitleIDs(string jsonString) => JsonHelper.FromJson<VitaDBItem>(jsonString);
+//  }
 
-  /// <summary>
-  /// Json Helper tools, taken from https://stackoverflow.com/a/36244111
-  /// </summary>
-  public static class JsonHelper
-  {
-    public static T[] FromJson<T>(string json)
-    {
-      Wrapper<T> wrapper = JsonUtility.FromJson<Wrapper<T>>(FixJson(json));
-      return wrapper.Items;
-    }
-#pragma warning disable 0649
-    [System.Serializable]
-    private class Wrapper<T>
-    {
-      public T[] Items;
-    }
-#pragma warning restore 0649
-    /// <summary>
-    /// Formats JSON in a way that makes the FromJson thing above work
-    /// </summary>
-    /// <param name="value"></param>
-    /// <returns></returns>
-    static string FixJson(string value) => "{\"Items\":" + value + "}";
-  }
+//  /// <summary>
+//  /// Json Helper tools, taken from https://stackoverflow.com/a/36244111
+//  /// </summary>
+//  public static class JsonHelper
+//  {
+//    public static T[] FromJson<T>(string json)
+//    {
+//      Wrapper<T> wrapper = JsonUtility.FromJson<Wrapper<T>>(FixJson(json));
+//      return wrapper.Items;
+//    }
+//#pragma warning disable 0649
+//    [System.Serializable]
+//    private class Wrapper<T>
+//    {
+//      public T[] Items;
+//    }
+//#pragma warning restore 0649
+//    /// <summary>
+//    /// Formats JSON in a way that makes the FromJson thing above work
+//    /// </summary>
+//    /// <param name="value"></param>
+//    /// <returns></returns>
+//    static string FixJson(string value) => "{\"Items\":" + value + "}";
+//  }
 }
