@@ -18,6 +18,9 @@ namespace PSVitaUtilities.Building
 {
     public class BuildVPK : EditorWindow
     {
+        //[MenuItem("PSVita/Test/PingVita")]
+        //public static void TestPing() => PingVita();
+
         #region Build Functions
         [MenuItem("PSVita/Build/Build VPK")]
         public static void BuildGameNormal() => BuildGame(BuildMode.Normal);
@@ -62,16 +65,16 @@ namespace PSVitaUtilities.Building
                     if (!EditorUtility.DisplayDialog("Are you sure?", "This is a work in progress function meant only to quickly test out code changes, it requires the game being preinstalled on the system", "Continue", "Stop"))
                         return;
 
-          EditorUtility.DisplayProgressBar("Building", "Killing All Apps On Vita...", 0f / 6f);
-          Error = $"{buildType} Failed (Network Error: Failed to kill all apps)";
-          VitaDestroy();
+                    EditorUtility.DisplayProgressBar("Building", "Killing All Apps On Vita...", 0f / 6f);
+                    Error = $"{buildType} Failed (Network Error: Failed to kill all apps)";
+                    VitaDestroy();
 
-          #region Initialise Vita
-          Error = $"{buildType} Failed (Network Error: Failed to initially reboot Vita)";
-          VitaReboot();
-          #endregion
-        }
-        #endregion
+                    #region Initialise Vita
+                    Error = $"{buildType} Failed (Network Error: Failed to initially reboot Vita)";
+                    VitaReboot();
+                    #endregion
+                }
+                #endregion
 
                 #region TitleID Check
                 Error = $"{buildType} Failed (TitleID Check Error: Try turning off the TitleID Check in settings or Refreshing the VitaDB in settings)";
@@ -363,18 +366,18 @@ namespace PSVitaUtilities.Building
                     catch
                     {
                         retry += 1;
-                        Debug.LogError("Network Error on " + temp[i].Substring(_filePath.Length));
+                        //Debug.LogError("Network Error on " + temp[i].Substring(_filePath.Length));
                         error.Add(i);
                     }
                 }
             }
-            if (error.Count != 0)
+            if (error.Count != 0 && retry < 3)
             {
                 while (error.Count != 0)
                 {
                     for (int i = 0; i < error.Count; i++)
                     {
-                        Debug.Log("Retrying Upload");
+                        //Debug.Log("Retrying Upload");
                         try
                         {
                             if (error.Count != 0)
@@ -388,13 +391,18 @@ namespace PSVitaUtilities.Building
                         catch
                         {
                             retry += 1;
-                            if (retry == 3)
+                            if (retry >= 3)
                             {
+                                Debug.LogError("Build and Run Failed (Network Error: Failed to Transfer Build)");
                                 error.RemoveRange(0, error.Count);
                             }
                         }
                     }
                 }
+            }
+            else if (retry >= 3)
+            {
+                Debug.LogError("Build and Run Failed (Network Error: Failed to Transfer Build)");
             }
             await Task.Delay(3000);
         }
