@@ -1,6 +1,6 @@
 ﻿using UnityEditor;
 using UnityEngine;
-//using Unity.EditorCoroutines.Editor;
+using Unity.EditorCoroutines.Editor;
 using System.Threading;
 using System.IO;
 using System.IO.Compression;
@@ -118,15 +118,13 @@ namespace PSVitaUtilities.Building
                 #region Delete Junk
                 EditorUtility.DisplayProgressBar("Building", "Deleting junk...", 3f / 5f);
                 Error = $"{buildType} Failed (Failed to Delete Junk)";
-                var t = Task.Run(() => DeleteJunk(BuildPath));
-                t.Wait();
+                DeleteJunk(BuildPath);
                 #endregion
 
                 #region Remove Trial
                 Error = $"{buildType} Failed (Failed to edit TempBuild.self)";
                 EditorUtility.DisplayProgressBar("Building", "Removing trial...", 4f / 5f);
-                t = Task.Run(() => RemoveTrial(BuildPath));
-                t.Wait();
+                RemoveTrial(BuildPath);
 
                 #endregion
 
@@ -134,10 +132,9 @@ namespace PSVitaUtilities.Building
                 if (buildMode != BuildMode.Run)
                 {
                     Error = $"{buildType} Failed (Failed to zip To VPK)";
-                    EditorUtility.DisplayProgressBar("Building", "Finalising build...", 5f / 5f);
+                    EditorUtility.DisplayProgressBar("Building", "Finalising build...", 5f / 6f);
 
-                    t = Task.Run(() => MakeZip(BuildPath, filePath));
-                    t.Wait();
+                    MakeZip(BuildPath, filePath);
                 }
                 #endregion
 
@@ -145,10 +142,10 @@ namespace PSVitaUtilities.Building
                 if (buildMode == BuildMode.FTP)
                 {
                     Error = $"{buildType} Failed (Network Error: Failed to transfer Build)";
-                    EditorUtility.DisplayProgressBar("Building", "Transfering build...", 6f / 6f);
                     string productName = PlayerSettings.productName;
-                    t = Task.Run(() => TransferFTPVPK(filePath, "ftp://" + PSVitaUtilitiesSettings.PSVitaIP + ":1337/" + PSVitaUtilitiesSettings.FTPLocation + "/" + productName + ".vpk"));
-                    t.Wait();
+                    EditorUtility.DisplayProgressBar("Building", "Transfering " + productName + ".vpk", 6f / 7f);
+                    TransferFTPVPK(filePath, "ftp://" + PSVitaUtilitiesSettings.PSVitaIP + ":1337/" + PSVitaUtilitiesSettings.FTPLocation + "/" + productName + ".vpk");
+
                 }
                 #endregion
 
@@ -159,12 +156,11 @@ namespace PSVitaUtilities.Building
                     Error = $"{buildType} Failed (Network Error: Failed to Transfer Build)";
                     EditorUtility.DisplayProgressBar("Building", "Transfering build...", 5f / 6f);
                     string temp = PSVitaUtilitiesSettings.TitleID;
-                    t = Task.Run(() => TransferFolder(BuildPath, "ftp://" + PSVitaUtilitiesSettings.PSVitaIP + ":1337/ux0:/app/" + temp));
-                    t.Wait();
+                    TransferFolder(BuildPath, "ftp://" + PSVitaUtilitiesSettings.PSVitaIP + ":1337/ux0:/app/" + temp);
                     #endregion
 
                     #region Reboot Vita
-                    EditorUtility.DisplayProgressBar("Building", "Booting Game...", 6f / 6f);
+                    EditorUtility.DisplayProgressBar("Building", "Booting Game...", 6f / 7f);
                     Error = $"{buildType} Failed (Network Error: Failed to reboot Vita)";
                     VitaReboot();
                     #endregion
@@ -208,6 +204,9 @@ namespace PSVitaUtilities.Building
         public static void LaunchGame()
         {
             PSVitaUtilitiesSettings.LoadSettings();
+            if (PSVitaUtilitiesSettings.KillAllAppsBeforeLaunch)
+                VitaDestroy();
+
             VitaControl($"launch { PSVitaUtilitiesSettings.TitleID}");
         }
 
@@ -232,13 +231,14 @@ namespace PSVitaUtilities.Building
 
         static void VitaControl(string action)
         {
-            PSVitaUtilitiesSettings.LoadSettings();
-            TcpClient client = new TcpClient(PSVitaUtilitiesSettings.PSVitaIP, (Int32)1338);
-            Byte[] data = System.Text.Encoding.ASCII.GetBytes($"{action}\n");
-            NetworkStream stream = client.GetStream();
-            stream.Write(data, 0, data.Length);
-            stream.Close();
-            client.Close();
+                PSVitaUtilitiesSettings.LoadSettings();
+                TcpClient client = new TcpClient(PSVitaUtilitiesSettings.PSVitaIP, (Int32)1338);
+
+                Byte[] data = System.Text.Encoding.ASCII.GetBytes($"{action}\n");
+                NetworkStream stream = client.GetStream();
+                stream.Write(data, 0, data.Length);
+                stream.Close();
+                client.Close();
         }
         #endregion
 
@@ -284,6 +284,11 @@ namespace PSVitaUtilities.Building
             }
             return i;
         }
+
+        void OnInspectorUpdate()
+        {
+            Repaint();
+        }
         static bool PingVita()
         {
             Debug.Log("Pinging Vita...");
@@ -299,14 +304,13 @@ namespace PSVitaUtilities.Building
         #endregion
 
         #region Build Stages
-        private static async Task DeleteJunk(string _buildPath)
+        private static void DeleteJunk(string _buildPath)
         {
             Directory.Delete(_buildPath + "/SymbolFiles", true);
             File.Delete(_buildPath + "/configuration.psp2path");
             File.Delete(_buildPath + "/TempBuild.bat");
-            await Task.Delay(1000);
         }
-        private static async Task RemoveTrial(string _buildPath)
+        private static void RemoveTrial(string _buildPath)
         {
             long pos = 0;
             if (!PSVitaUtilitiesSettings.FastBuild)
@@ -325,19 +329,16 @@ namespace PSVitaUtilities.Building
                 }
             }
             System.IO.File.Move(_buildPath + "/TempBuild.self", _buildPath + "/eboot.bin");
-            await Task.Delay(5000);
         }
-        private static async Task MakeZip(string _buildPath, string _filePath)
+        private static void MakeZip(string _buildPath, string _filePath)
         {
             if (File.Exists(_filePath))
             {
                 File.Delete(_filePath);
             }
             ZipFile.CreateFromDirectory(_buildPath, _filePath);
-            //File.Delete(_buildPath);
-            await Task.Delay(1000);
         }
-        private static async Task TransferFTPVPK(string _filePath, string _ip)
+        private static void TransferFTPVPK(string _filePath, string _ip)
         {
             WebClient client = new WebClient();
             int error = 0;
@@ -352,16 +353,15 @@ namespace PSVitaUtilities.Building
                 catch
                 {
                     error += 1;
-                    if(error>=PSVitaUtilitiesSettings.Retying)
+                    if (error >= PSVitaUtilitiesSettings.RetryCount)
                     {
                         done = true;
                         Debug.LogError("Build FTP VPK Failed (Network Error: Failed to transfer Build)");
                     }
                 }
             }
-            await Task.Delay(1000);
         }
-        private async static Task TransferFolder(string _filePath, string _ip)
+        private static void TransferFolder(string _filePath, string _ip)
         {
             WebClient client = new WebClient();
             //client.Timeout = 30000;
@@ -370,21 +370,23 @@ namespace PSVitaUtilities.Building
             int retry = 0;
             for (int i = 0; i < temp.Length; i++)
             {
-                if (!temp[i].Contains("sce_sys"))
+                if (!(temp[i].Contains("sce_sys") || temp[i].Contains("sce_module")))
                 {
                     try
                     {
-                        if (retry >= PSVitaUtilitiesSettings.Retying)
+                        if (retry >= PSVitaUtilitiesSettings.RetryCount)
                         {
                             break;
                         }
+                        EditorUtility.DisplayProgressBar("Building", "Transfering build " + temp[i].Substring(_filePath.Length), (float)i / (float)temp.Length);
+                        Task.Delay(1000);
                         client.UploadFile(new Uri(_ip + temp[i].Substring(_filePath.Length)), temp[i]);
                         retry = 0;
                     }
                     catch
                     {
                         retry += 1;
-                        //Debug.LogError("Network Error on " + temp[i].Substring(_filePath.Length));
+                        Debug.LogError("Network Error on " + temp[i].Substring(_filePath.Length));
                         error.Add(i);
                     }
                 }
@@ -409,7 +411,7 @@ namespace PSVitaUtilities.Building
                         catch
                         {
                             retry += 1;
-                            if (retry >= PSVitaUtilitiesSettings.Retying)
+                            if (retry >= PSVitaUtilitiesSettings.RetryCount)
                             {
                                 Debug.LogError("Build and Run Failed (Network Error: Failed to Transfer Build)");
                                 error.RemoveRange(0, error.Count);
@@ -418,11 +420,10 @@ namespace PSVitaUtilities.Building
                     }
                 }
             }
-            else if (retry >= PSVitaUtilitiesSettings.Retying)
+            else if (retry >= PSVitaUtilitiesSettings.RetryCount)
             {
                 Debug.LogError("Build and Run Failed (Network Error: Failed to Transfer Build)");
             }
-            await Task.Delay(3000);
         }
         #endregion
     }
