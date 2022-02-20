@@ -18,9 +18,6 @@ namespace PSVitaUtilities.Building
 {
     public class BuildVPK : EditorWindow
     {
-        [MenuItem("PSVita/Test/PingVita")]
-        public static void TestPing() => PingVita();
-
         #region Build Functions
         [MenuItem("PSVita/Build/Build VPK")]
         public static void BuildGameNormal() => BuildGame(BuildMode.Normal);
