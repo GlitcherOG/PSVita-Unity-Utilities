@@ -23,7 +23,7 @@ To use the project you are required to:
 - Switch To PSVita in the build settings and make sure its set to PC Hosted
 - To improve chances of FTP transfering going through in vita settings and in power save settings set standby mode to 10-30 mins and turn off use Wifi in power save mode
  
-Note: These tools were made for use with Unity 2018.2.19f1 but may work on older versions
+Note: These tools were made for use with listed versions but my work on others
     
 ## Installation
 Just import the Unity Package into the Project or download the git and add approparte versions the editor folder and mcs.rsp to the asset folder of your project
