@@ -64,10 +64,10 @@ namespace PSVitaUtilities.Building
                     Error = $"{buildType} Failed (Network Error: Failed to kill all apps)";
                     VitaDestroy();
 
-                    #region Initialise Vita
-                    Error = $"{buildType} Failed (Network Error: Failed to initially reboot Vita)";
-                    VitaReboot();
-                    #endregion
+                    //#region Initialise Vita
+                    //Error = $"{buildType} Failed (Network Error: Failed to initially reboot Vita)";
+                    ////VitaReboot();
+                    //#endregion
                 }
                 #endregion
 
@@ -157,25 +157,20 @@ namespace PSVitaUtilities.Building
                     #region Reboot Vita
                     EditorUtility.DisplayProgressBar("Building", "Booting Game...", 6f / 7f);
                     Error = $"{buildType} Failed (Network Error: Failed to reboot Vita)";
-                    VitaReboot();
                     #endregion
-
                     #region Run Game
-                    //Task.Delay(4000);
-                    //try
-                    //{
-                    //  Error = $"{buildType} Failed (Network Error: Failed To Launch Game Automatically. Was the Vita fully rebooted?)";
-                    //  if (PingVita())
-                    //  {
-                    //    ScreenOn();
-                    //    LaunchGame();
-                    //  }
-                    //}
-                    //catch
-                    //{
-                    if (EditorUtility.DisplayDialog("Start Game?", "Is the Vita ready to start the game?", "Yes", "No"))
+                    if (PSVitaUtilitiesSettings.BuildRunReboot)
                     {
-                        Error = $"{buildType} Failed (Network Error: Failed To Launch Game. Was the Vita fully rebooted?)";
+                        VitaReboot();
+                        if (EditorUtility.DisplayDialog("Start Game?", "Is the Vita ready to start the game?", "Yes", "No"))
+                        {
+                            Error = $"{buildType} Failed (Network Error: Failed To Launch Game. Was the Vita fully rebooted?)";
+                            ScreenOn();
+                            LaunchGame();
+                        }
+                    }
+                    else
+                    {
                         ScreenOn();
                         LaunchGame();
                     }
