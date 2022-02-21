@@ -1,17 +1,13 @@
 ﻿using UnityEditor;
 using UnityEngine;
-using System.Threading;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using PSVitaUtilities.Settings;
-using UnityEngine.Networking;
 
 namespace PSVitaUtilities.Building
 {
@@ -230,63 +226,36 @@ namespace PSVitaUtilities.Building
 
         static void VitaControl(string action)
         {
-                PSVitaUtilitiesSettings.LoadSettings();
-                TcpClient client = new TcpClient(PSVitaUtilitiesSettings.PSVitaIP, (Int32)1338);
+            PSVitaUtilitiesSettings.LoadSettings();
+            TcpClient client = new TcpClient(PSVitaUtilitiesSettings.PSVitaIP, (Int32)1338);
 
-                Byte[] data = System.Text.Encoding.ASCII.GetBytes($"{action}\n");
-                NetworkStream stream = client.GetStream();
-                stream.Write(data, 0, data.Length);
-                stream.Close();
-                client.Close();
+            Byte[] data = System.Text.Encoding.ASCII.GetBytes($"{action}\n");
+            NetworkStream stream = client.GetStream();
+            stream.Write(data, 0, data.Length);
+            stream.Close();
+            client.Close();
         }
         #endregion
 
         #region Helper Functions
         public static long FindPosition(Stream stream, byte[] byteSequence)
         {
-            if (byteSequence.Length > stream.Length)
-                return -1;
-
-            byte[] buffer = new byte[byteSequence.Length];
-
-            using (BufferedStream bufStream = new BufferedStream(stream, byteSequence.Length))
+            int b;
+            long i = 0;
+            while ((b = stream.ReadByte()) != -1)
             {
-                int i = 0;
-                if (i != 0)
+                if (b == byteSequence[i++])
                 {
-                    i = 0;
+                    if (i == byteSequence.Length)
+                    {
+                        return stream.Position - byteSequence.Length;
+                    }
                 }
-                while ((i = bufStream.Read(buffer, 0, byteSequence.Length)) == byteSequence.Length)
-                {
-                    if (byteSequence.SequenceEqual(buffer))
-                        return bufStream.Position - byteSequence.Length;
-                    else
-                        bufStream.Position -= byteSequence.Length - PadLeftSequence(buffer, byteSequence);
-                }
+                else
+                    i = b == byteSequence[0] ? 1 : 0;
             }
 
             return -1;
-        }
-        private static int PadLeftSequence(byte[] bytes, byte[] seqBytes)
-        {
-            int i = 1;
-            while (i < bytes.Length)
-            {
-                int n = bytes.Length - i;
-                byte[] aux1 = new byte[n];
-                byte[] aux2 = new byte[n];
-                Array.Copy(bytes, i, aux1, 0, n);
-                Array.Copy(seqBytes, aux2, n);
-                if (aux1.SequenceEqual(aux2))
-                    return i;
-                i++;
-            }
-            return i;
-        }
-
-        void OnInspectorUpdate()
-        {
-            Repaint();
         }
         static bool PingVita()
         {
@@ -311,11 +280,6 @@ namespace PSVitaUtilities.Building
         }
         private static void RemoveTrial(string _buildPath)
         {
-            long pos = 0;
-            if (!PSVitaUtilitiesSettings.FastBuild)
-            {
-                pos = FindPosition(File.Open(_buildPath + "/TempBuild.self", FileMode.Open), new byte[] { 0x74, 0x72, 0x69, 0x61, 0x6C, 0x2E, 0x70, 0x6E, 0x67 });
-            }
             using (Stream stream = File.Open(_buildPath + "/TempBuild.self", FileMode.Open))
             {
                 stream.Position = 0x80;
@@ -323,6 +287,7 @@ namespace PSVitaUtilities.Building
                 stream.Position = 0x00;
                 if (!PSVitaUtilitiesSettings.FastBuild)
                 {
+                    long pos = FindPosition(stream, new byte[] { 0x74, 0x72, 0x69, 0x61, 0x6C, 0x2E, 0x70, 0x6E, 0x67 });
                     stream.Position = pos;
                     stream.WriteByte(0x00);
                 }
@@ -363,7 +328,6 @@ namespace PSVitaUtilities.Building
         private static void TransferFolder(string _filePath, string _ip)
         {
             WebClient client = new WebClient();
-            //client.Timeout = 30000;
             var temp = Directory.GetFiles(_filePath, "*.*", SearchOption.AllDirectories);
             List<int> error = new List<int>();
             int retry = 0;
@@ -396,7 +360,6 @@ namespace PSVitaUtilities.Building
                 {
                     for (int i = 0; i < error.Count; i++)
                     {
-                        //Debug.Log("Retrying Upload");
                         try
                         {
                             if (error.Count != 0)

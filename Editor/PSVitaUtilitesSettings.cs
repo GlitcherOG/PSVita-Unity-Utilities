@@ -1,11 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
-using UnityEngine.Networking;
 using System.IO;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace PSVitaUtilities.Settings
 {
