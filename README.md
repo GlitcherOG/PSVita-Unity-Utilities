@@ -18,7 +18,7 @@ To use the project you are required to:
 - Switch To PSVita in the build settings and make sure its set to PC Hosted
 - To improve chances of FTP transfering going through in vita settings and in power save settings set standby mode to 10-30 mins and turn off use Wifi in power save mode
  
-Note: These tools were made for use with Unity 2018.2.19f1 but may work on older versions. Unity 2017 requires title check turnned off in the settings.
+Note: These tools were made for use with Unity 2018.2.19f1 but may work on older versions. Unity 2017 requires title check against the vita db turnned off in the settings.
 
 ## Installation
 
