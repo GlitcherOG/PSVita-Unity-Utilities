@@ -1,3 +1,4 @@
+![image](https://user-images.githubusercontent.com/19144524/155105095-ec92ef94-98fd-4833-9ef6-fdcb16d53a65.png)
 # PSVita Unity Utilities
 
 Tools to help speed up PSVita Unity Development
@@ -18,7 +19,8 @@ To use the project you are required to:
 - Switch To PSVita in the build settings and make sure its set to PC Hosted
 - To improve chances of FTP transfering going through in vita settings and in power save settings set standby mode to 10-30 mins and turn off use Wifi in power save mode
  
-Note: These tools were made for use with Unity 2018.2.19f1 but may work on older versions. Unity 2017 requires title check against the vita db turnned off in the settings.
+Note: These tools were made for use with Unity 2018.2.19f1 but may work on older versions. 
+Unity 2017 currently requires Title Check against VitaDB be disabled in the settings.
 
 ## Installation
 
