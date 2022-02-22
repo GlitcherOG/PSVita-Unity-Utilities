@@ -1,4 +1,3 @@
-![image](https://user-images.githubusercontent.com/19144524/155105095-ec92ef94-98fd-4833-9ef6-fdcb16d53a65.png)
 # PSVita Unity Utilities
 
 Tools to help speed up PSVita Unity Development
