@@ -18,14 +18,26 @@ namespace PSVitaUtilities.Building
     static string buildCache = Application.dataPath.TrimEnd("Assets".ToCharArray()) + "/Build/BuildCache";
 
     #region Build Functions
-    [MenuItem("PSVita/Build/Build VPK")]
+    [MenuItem("PSVita/Build/Build VPK", false, -1)]
     public static void BuildGameNormal() => BuildGame(BuildMode.Normal);
 
-    [MenuItem("PSVita/Build/Build FTP VPK")]
+    [MenuItem("PSVita/Build/FTP/Build and Send VPK")]
     public static void BuildGameFTP() => BuildGame(BuildMode.FTP);
 
-    [MenuItem("PSVita/Build/Build and Run (WIP)")]
+    [MenuItem("PSVita/Build/FTP/Transfer Build")]
+    public static void BuildFTPTransfer() => BuildGame(BuildMode.FTPTransfer);
+
+    [MenuItem("PSVita/Build/FTP/Build and Run (WIP)")]
     public static void BuildGameRun() => BuildGame(BuildMode.Run);
+
+    [MenuItem("PSVita/Build/USB/Build and Send VPK (WIP)")]
+    public static void BuildGameUSB() => BuildGame(BuildMode.USB);
+
+    [MenuItem("PSVita/Build/USB/Build and Run (WIP)")]
+    public static void BuildGameUSBRun() => BuildGame(BuildMode.USBRun);
+
+    //[MenuItem("PSVita/Build/Emulator/Build and Transfer")]
+    public static void BuildEmuTransfer() => BuildGame(BuildMode.EmuTransfer);
 
     public static void BuildGame(BuildMode buildMode)
     {
@@ -46,6 +58,18 @@ namespace PSVitaUtilities.Building
         case BuildMode.Run:
           buildType = "Build and Run";
           break;
+        case BuildMode.USB:
+          buildType = "USB VPK Build";
+          break;
+        case BuildMode.USBRun:
+          buildType = "USB Build and Run Build";
+          break;
+        case BuildMode.EmuTransfer:
+          buildType = "Emulator Transfer";
+          break;
+        case BuildMode.FTPTransfer:
+          buildType = "FTP Build Transfer";
+          break;
       }
       #endregion
 
@@ -65,11 +89,19 @@ namespace PSVitaUtilities.Building
           EditorUtility.DisplayProgressBar("Building", "Killing All Apps On Vita...", 0f / 6f);
           Error = $"{buildType} Failed (Network Error: Failed to kill all apps)";
           VitaDestroy();
+        }
+        if (buildMode == BuildMode.USBRun)
+        {
+          if (!EditorUtility.DisplayDialog("Are you sure?", "This is a work in progress function that could potentally crash your vita and crash in Unity 2017. It requires the game being preinstalled on the system at least once", "Continue", "Stop"))
+            return;
 
-          //#region Initialise Vita
-          //Error = $"{buildType} Failed (Network Error: Failed to initially reboot Vita)";
-          ////VitaReboot();
-          //#endregion
+          ScreenOn();
+          //EditorUtility.DisplayProgressBar("Building", "Killing All Apps On Vita...", 0f / 6f);
+          //Error = $"{buildType} Failed (Network Error: Failed to kill all apps)";
+          //VitaDestroy();
+          //VitaShellLaunch();
+          //if (!EditorUtility.DisplayDialog("Have you enabled USB transfer on VitaShell?", "This function requires that the VitaShell USB transfer is enabled and active. Please press continue if you have done so.", "Continue", "Stop"))
+          //  return;
         }
         #endregion
 
@@ -108,11 +140,10 @@ namespace PSVitaUtilities.Building
 
         #region Build Project
         Error = $"{buildType} Failed (Failed to Build)";
-        if (buildMode != BuildMode.Run)
+        if (buildMode != BuildMode.Run && buildMode != BuildMode.FTPTransfer)
         {
           if (Directory.Exists(buildCache))
             Directory.Delete(buildCache, true);
-
         }
         EditorUtility.DisplayProgressBar("Building", "Building project...", 2f / 5f);
         BuildPipeline.BuildPlayer(EditorBuildSettings.scenes, BuildPath, BuildTarget.PSP2, BuildOptions.None);
@@ -128,11 +159,10 @@ namespace PSVitaUtilities.Building
         Error = $"{buildType} Failed (Failed to edit TempBuild.self)";
         EditorUtility.DisplayProgressBar("Building", "Removing trial...", 4f / 5f);
         RemoveTrial(BuildPath);
-
         #endregion
 
         #region Make VPK
-        if (buildMode != BuildMode.Run)
+        if (buildMode != BuildMode.Run && buildMode != BuildMode.FTPTransfer && buildMode != BuildMode.EmuTransfer)
         {
           Error = $"{buildType} Failed (Failed to zip To VPK)";
           EditorUtility.DisplayProgressBar("Building", "Finalising build...", 5f / 6f);
@@ -141,6 +171,8 @@ namespace PSVitaUtilities.Building
         }
         #endregion
 
+        DateTime startTransferTime = DateTime.Now;
+
         #region FTP - Send to Vita
         if (buildMode == BuildMode.FTP)
         {
@@ -148,12 +180,21 @@ namespace PSVitaUtilities.Building
           string productName = PlayerSettings.productName;
           EditorUtility.DisplayProgressBar("Building", "Transfering " + productName + ".vpk", 6f / 7f);
           TransferFTPVPK(filePath, "ftp://" + PSVitaUtilitiesSettings.PSVitaIP + ":1337/" + PSVitaUtilitiesSettings.FTPLocation + "/" + productName + ".vpk");
-
         }
         #endregion
 
-        #region Build and Run - Send to Vita and Run
-        if (buildMode == BuildMode.Run)
+        #region USB - Send to Vita
+        if (buildMode == BuildMode.USB)
+        {
+          Error = $"{buildType} Failed (Transfer Error: Failed to transfer Build)";
+          string productName = PlayerSettings.productName;
+          EditorUtility.DisplayProgressBar("Building", "Transfering " + productName + ".vpk", 6f / 7f);
+          TransferUSBVPK(filePath, $"{PSVitaUtilitiesSettings.USBDriveLetter}/{productName}.vpk");
+        }
+        #endregion
+
+        #region FTP - Build and Run - Send to Vita and Run
+        if (buildMode == BuildMode.Run || buildMode == BuildMode.FTPTransfer)
         {
           #region Send to Vita
           Error = $"{buildType} Failed (Network Error: Failed to Transfer Build)";
@@ -161,35 +202,58 @@ namespace PSVitaUtilities.Building
           string temp = PSVitaUtilitiesSettings.TitleID;
           TransferFolder(BuildPath, "ftp://" + PSVitaUtilitiesSettings.PSVitaIP + ":1337/ux0:/app/" + temp);
           #endregion
+          if (buildMode == BuildMode.Run)
+          {
+            #region Reboot Vita
+            EditorUtility.DisplayProgressBar("Building", "Booting Game...", 6f / 7f);
+            Error = $"{buildType} Failed (Network Error: Failed to reboot Vita)";
+            #endregion
+          }
+        }
+        #endregion
 
-          #region Reboot Vita
-          EditorUtility.DisplayProgressBar("Building", "Booting Game...", 6f / 7f);
-          Error = $"{buildType} Failed (Network Error: Failed to reboot Vita)";
-          #endregion
-          #region Run Game
-          if (PSVitaUtilitiesSettings.BuildRunReboot)
-          {
-            VitaReboot();
-            if (EditorUtility.DisplayDialog("Start Game?", "Is the Vita ready to start the game?", "Yes", "No"))
-            {
-              Error = $"{buildType} Failed (Network Error: Failed To Launch Game. Was the Vita fully rebooted?)";
-              ScreenOn();
-              LaunchGame();
-            }
-          }
-          else
-          {
-            ScreenOn();
-            LaunchGame();
-          }
-          //}
-          EditorUtility.ClearProgressBar();
+        #region USB - Build and Run - Send to Vita and Run
+        if (buildMode == BuildMode.USBRun)
+        {
+          #region Send to Vita
+          Error = $"{buildType} Failed (Network Error: Failed to Transfer Build)";
+          EditorUtility.DisplayProgressBar("Building", "Transfering build...", 5f / 6f);
+          string temp = PSVitaUtilitiesSettings.TitleID;
+          TransferFolderUSB(BuildPath, $"{PSVitaUtilitiesSettings.USBDriveLetter}app/{temp}");
           #endregion
         }
         #endregion
 
+        #region Emu - Transfer to Emu
+        if (buildMode == BuildMode.EmuTransfer)
+        {
+          Error = $"{buildType} Failed (Failed to transfer Build)";
+          EditorUtility.DisplayProgressBar("Building", "Transfering build...", 6f / 6f);
+          CopyDirectory(BuildPath, PSVitaUtilitiesSettings.EmuStoragePath + "\\ux0/app\\" + PSVitaUtilitiesSettings.TitleID, true);
+        }
+        #endregion
+
+        TimeSpan transferTime = DateTime.Now - startTransferTime;
+        Debug.Log($"{buildType} Transfer complete in {transferTime:mm':'ss}!");
         TimeSpan buildTime = DateTime.Now - startTime;
         Debug.Log($"{buildType} Complete in {buildTime:mm':'ss}!");
+
+        #region Run Game
+        if (buildMode == BuildMode.Run || buildMode == BuildMode.USBRun)
+        {
+          if (PSVitaUtilitiesSettings.BuildRunReboot)
+          {
+            VitaReboot();
+            if (EditorUtility.DisplayDialog("Start Game?", "Is the Vita ready to start the game?", "Yes", "No"))
+              Error = $"{buildType} Failed (Network Error: Failed To Launch Game. Was the Vita fully rebooted?)";
+          }
+
+          ScreenOn();
+          LaunchGame();
+
+          EditorUtility.ClearProgressBar();
+        }
+        #endregion
       }
       catch
       {
@@ -197,7 +261,6 @@ namespace PSVitaUtilities.Building
       }
       EditorUtility.ClearProgressBar();
     }
-
     #endregion
 
     #region Vita Control Functions
@@ -503,6 +566,53 @@ namespace PSVitaUtilities.Building
 
       CopyDirectory(_filePath, buildCache, true);
     }
+
+    private static void TransferUSBVPK(string _source, string _dest)
+    {
+      try { File.Copy(_source, _dest, true); }
+      catch { Debug.LogError($"{buildType} Failed (Transfer Error: Failed to transfer Build)"); }
+    }
+
+    private static void TransferFolderUSB(string _source, string _dest)
+    {
+      try
+      {
+        DirectoryInfo target = new DirectoryInfo(_dest);
+        DirectoryInfo source = new DirectoryInfo(_source);
+
+        if (!Directory.Exists(target.FullName))
+        {
+          Debug.LogError("Please ensure you have installed the project already before using Build and Run");
+          throw new Exception();
+        }
+
+        // Copy each file into it’s new directory.
+        foreach (FileInfo fi in source.GetFiles())
+        {
+          if (!Skippable(fi.Name))
+          {
+            //Debug.Log($"Copying {target.FullName}\\{fi.Name}");
+            fi.CopyTo(Path.Combine(target.ToString(), fi.Name), true);
+          }
+        }
+
+        // Copy each subdirectory using recursion.
+        foreach (DirectoryInfo diSourceSubDir in source.GetDirectories())
+        {
+          if (!Skippable(diSourceSubDir.Name))
+          {
+            DirectoryInfo nextTargetSubDir =
+              target.CreateSubdirectory(diSourceSubDir.Name);
+            TransferFolderUSB(diSourceSubDir.ToString(), nextTargetSubDir.ToString());
+          }
+        }
+      }
+      catch
+      {
+        Debug.LogError($"{buildType} Failed (Transfer Error: Failed to transfer Build)");
+      }
+
+    }
     #endregion
   }
 
@@ -516,7 +626,11 @@ namespace PSVitaUtilities.Building
   {
     Normal = 0,
     FTP = 1,
-    Run = 2
+    FTPTransfer = 2,
+    Run = 3,
+    USB = 4,
+    USBRun = 5,
+    EmuTransfer = 6
   }
 
   [System.Serializable]
