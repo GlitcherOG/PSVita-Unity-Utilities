@@ -27,7 +27,7 @@ Just import the Unity Package into the Project or download the git and add the e
 
 ## Authors
 - [GlitcherOG](https://github.com/GlitcherOG)
-- [Jody3D](https://github.com/Jordy3D)
+- [Jordy3D](https://github.com/Jordy3D)
 
 ## Special Thanks
 
