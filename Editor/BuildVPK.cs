@@ -33,7 +33,7 @@ namespace PSVitaUtilities.Building
     [MenuItem("PSVita/Build/USB/Build and Send VPK (WIP)")]
     public static void BuildGameUSB() => BuildGame(BuildMode.USB);
 
-    [MenuItem("PSVita/Build/USB/Build and Run (WIP)")]
+    //[MenuItem("PSVita/Build/USB/Build and Run (WIP)")]
     public static void BuildGameUSBRun() => BuildGame(BuildMode.USBRun);
 
     //[MenuItem("PSVita/Build/Emulator/Build and Transfer")]

@@ -140,10 +140,10 @@ namespace PSVitaUtilities.Settings
                 ShowTrialWatermark = EditorGUILayout.ToggleLeft("Enable \"Trial Version\" watermark", ShowTrialWatermark, EditorStyles.wordWrappedLabel);
                 VitaBDCheck = EditorGUILayout.ToggleLeft("Check TitleID against the VitaDB", VitaBDCheck, EditorStyles.wordWrappedLabel);
                 BuildRunReboot = EditorGUILayout.ToggleLeft("Reboot Vita before starting game", BuildRunReboot, EditorStyles.wordWrappedLabel);
-                EditorIndentBlock("This will automatically reboot the vita after Build and Run finishes transferring files. May reduce errors.");
+                EditorIndentBlock("This will automatically reboot the Vita after Build and Run finishes transferring files. May reduce errors.");
                 KillAllAppsBeforeLaunch = EditorGUILayout.ToggleLeft("Kill all apps on Vita before launching game remotely", KillAllAppsBeforeLaunch, EditorStyles.wordWrappedLabel);
                 SizeCheck = EditorGUILayout.ToggleLeft("Check Files Before Transfering", SizeCheck, EditorStyles.wordWrappedLabel);
-                EditorIndentBlock("This will check if the file being transferring already exists in the Build and Run Cache, and skip them if the match.");
+                EditorIndentBlock("This will check if the file being transferring already exists in the Build and Run Cache, and skip them if they match.");
                 #endregion
 
                 EditorLine();
